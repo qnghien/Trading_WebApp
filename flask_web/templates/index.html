@@ -1,0 +1,183 @@
+{% extends 'base/base.html' %}
+
+{% block title%} My Portfolio {%endblock%}
+
+{% block header%} 
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+      <div class="header-body">
+        <div class="row align-items-center py-4">
+          <div class="col-lg-6 col-7">
+            <h6 class="h2 bg-dark text-white  text-center d-inline-block mb-0 p-2 card">Your Portfolio</h6>
+          </div>
+        </div>
+		<div class="row align-items-center py-4">   	  
+          <!-- Card stats -->            
+            <div class="col-xl-3 col-md-6">
+              <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <h5 class="card-title text-uppercase text-muted mb-0">Currency Pairs</h5>
+                      <span class="h2 font-weight-bold mb-0">{{len_list}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+              <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <h5 class="card-title text-uppercase text-muted mb-0">Revenvue</h5>
+                      <span class="h2 font-weight-bold mb-0">0$</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+              <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                  <div class="row">	
+                    <div class="col ">
+                      <h5 class="card-title text-uppercase text-muted mb-0">Broker</h5>
+					  <a href="https://app.plus500.com/" class=" h2 font-weight-bold">Plus500</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+              <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <h5 class="card-title text-uppercase text-muted mb-0">Time</h5>
+                      <div class="calendar">
+                          <span class="h2 font-weight-bold mb-0 nav-item" id="time"></span>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+            
+		</div>
+      </div>
+	  </div>
+	</div>
+</div>
+{%endblock%}
+
+{% block content%}  
+	<!-- transaction segment-->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-top">
+                <h1 class="h3">Market board</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2" roll="group">
+                        <button id="list-pairs-btn" type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                          Currency Pairs
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="list-pairs-btn">
+							{% for pair in list_currency%}
+								<li id="{{pair}}" ><a class="dropdown-item" href="#">{{pair}}</a></li>
+							{% endfor%}
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Update</button>
+                </div>
+            </div>
+			<!-- Chart -->
+            <div class="my-4 w-100 card" id="chart-frame" width="90%" height="380"></div>
+        </div>
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <div class="row align-items-center">
+                            <div class="col"><h3 class="mb-0">Transaction Log</h3></div>
+                        </div>
+                    </div>
+                    <!-- Table Log -->  
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light"> 
+                                <tr>
+                                    <th scope="col">Currency</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Volume</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Buy/Sell</th>
+                                <tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>  
+                </div>  
+            </div>
+            <!-- Form -->
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <div class="row align-items-center">
+                            <div class="col"><h3 class="mb-0">Transaction Input</h3></div>
+                        </div>
+                    </div>
+                    <div>
+                    <form class="form align-items-center ml-5 mr-5" method="POST" action="{{url_for('transaction_request')}}" >
+                        <div class="row mb-3">
+                            <label for="CurrencyPair">Currency Pair</label>
+                            <input type="text" class="form-control" id="CurrencyPair" name="pair" placeholder="USD/JPY" required minlength="7" maxlength="7">
+                        </div>
+                        <div class="row mb-3">
+                            <label for="Volume">Volume</label>
+                            <input type="number" class="form-control" id="Volume" name="volume" placeholder="100000" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="date-order">Date</label>
+                            <input class="form-control" type="datetime-local" id="date-order" name="datetime" required>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="price">Price</label>
+                            <input class="form-control" type="number" id="price" name="price" required>
+                        </div>
+                        <div class="row">
+                            <div class="col form-check ml-5">
+                                  <input class="form-check-input" type="radio" name="purchaseType" id="buy-order">
+                                  <label class="form-check-label" for="buy">Buy</label>
+                            </div>
+                            <div class="col form-check ml-5">
+                                  <input class="form-check-input" type="radio" name="purchaseType" id="sell-order" checked>
+                                  <label class="form-check-label" for="sell">Sell</label>
+                            </div>
+                        <div>
+						<input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+                        <div class="row alight-items-center mt-3 mb-2"><button type="submit" class="btn btn-primary">Order</button></div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+{% endblock %}
+
+
+
+{% block javascripts %}
+    <!-- Optional JavaScript -->
+	<script src="{{url_for('static',filename='assets/js/time.js')}}"> </script>
+{% endblock %}
