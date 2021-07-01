@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, session
 from flask_wtf.csrf import CSRFProtect
 from flaskext.mysql import MySQL
+from flask_web.server import WebServer
 
 app = Flask(__name__, static_folder="static")
 app.config.update({
@@ -17,5 +18,15 @@ app.config['MYSQL_DATABASE_PORT'] = 3306
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-from flask_web import routes
-from flask_web import auth
+#mySQL
+mysql = MySQL()
+mysql.init_app(app)
+
+#init session
+session = session
+
+#init web server to process request
+webserver = WebServer(mysql)
+
+from flask_web import routes, auth
+

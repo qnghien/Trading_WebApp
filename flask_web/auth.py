@@ -1,23 +1,22 @@
-from flask import session, Flask, render_template,request,flash,redirect,url_for
-from flaskext.mysql import MySQL
-from flask_web import app
-
+from flask import render_template, request, redirect, url_for
+from flask_web import app, mysql, session
+import re
 
 @app.route('/')
 @app.route('/login',methods=['GET', 'POST'])
 def login():
-    msg = ''
+    msg=""
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
         password = request.form['password']
         cursor = mysql.connect().cursor()
-        cursor.execute("select * from user where username='"+username+"' and password='" + password+"'")
+        cursor.execute("select * from user where username='" + username + "' and password='" + password + "'")
         data = cursor.fetchone()
         if data:
             session['loggedin'] = True
-            session['username'] = data[0]
-            msg = 'Logged in successfully !'
-            return render_template('index.html', msg = msg)
+            session['username'] = username
+            session['id'] = data[0]
+            return redirect(url_for("index"))
         else:
             msg = 'Incorrect username/password'
     return render_template('login.html', msg = msg)
@@ -26,6 +25,7 @@ def login():
 def logout():
     session.pop('loggedin', None)
     session.pop('username', None)
+    session.pop('id', None)
     return redirect(url_for('login'))
 
 @app.route('/signup',methods=['GET', 'POST'])
@@ -48,13 +48,10 @@ def signup():
             msg = 'Fill out the form'
        
         else:
-            cursor.execute('INSERT INTO user VALUES (%s, %s)', (username, password,))
+            cursor.execute('INSERT INTO user (username, password) VALUES (%s, %s)', (username, password,))
             conn.commit()
             msg = 'You have successfully registered !'  
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
     return render_template('signup.html', msg = msg)
 
-
-if __name__ == '__main__':
-    app.run()
