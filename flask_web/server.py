@@ -47,11 +47,35 @@ class WebServer():
     ''' GET REQUEST'''
     
     #--------------------------------------------
-    def get_transaction_log(self, user_id):
+    def get_transaction_log(self, user_id, limit=0):
         conn = self.mysql.connect()
         cursor = conn.cursor()
-        cursor.execute("select * from transaction where user_id= (%s)", (user_id,))
-        datas = cursor.fetchall()
-        return datas
+        log_query = "select * from transaction where user_id= (%s) order by day desc"
+        if limit > 0:
+            log_query += " Limit " + str(limit)
         
+        cursor.execute(log_query, (user_id,))
+        data = cursor.fetchall()
+        return data
+        
+    #--------------------------------------------
+    def get_portfolio_by_user(self, user_id):
+        conn = self.mysql.connect()
+        cursor = conn.cursor()
+        portfolio_query = "WITH define_qty AS (SELECT ROW_NUMBER() OVER (ORDER BY day) AS rank_day, \
+                                    CASE \
+                                    WHEN status = 'SELL' \
+                                    THEN 0 - volume \
+                                    ELSE volume \
+                                    END AS qty, \
+                            price, currency_index \
+                            FROM transaction \
+                            WHERE user_id = (%s) ) \
+                            SELECT currency_index, SUM(qty) OVER (PARTITION BY currency_index ORDER BY rank_day) AS quant_cum, price \
+                            FROM define_qty \
+                            ORDER BY price "
+        cursor.execute(portfolio_query, (user_id,))
+        data = cursor.fetchall()
+        return data
+    #--------------------------------------------
         

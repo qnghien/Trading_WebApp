@@ -18,10 +18,12 @@ def login_required(function):
 @app.route('/index', methods=["GET","POST"], endpoint="index")
 @login_required
 def index():
-    log = webserver.get_transaction_log(session['id'])
+    log = webserver.get_transaction_log(session['id'], limit=8)
     pairs = sorted(set([ row[1] for row in log ]))
+    stats = webserver.get_portfolio_by_user(session['id'])
+    
     return render_template("index.html", len_list= len(pairs), 
-                            list_currency=pairs, user_name=session['username'], log=log)
+                            list_currency=pairs, user_name=session['username'], log=log, stats=stats)
      
 
 #------------------------------------------------------------------------------
@@ -34,7 +36,9 @@ def optimize_portfolio():
 @app.route('/data', endpoint="data_report")
 @login_required
 def data_report():
-    return render_template("data.html", user_name=session['username'])
+    log = webserver.get_transaction_log(session['id'])
+    
+    return render_template("data.html", user_name=session['username'], log=log)
     
 
 #------------------------------------------------------------------------------

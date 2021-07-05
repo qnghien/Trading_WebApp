@@ -1,0 +1,6 @@
+li {
+	cursor:pointer !important;
+}
+ul#list-pairs li:hover {
+	background-color: #7283e5 !important;
+}
