@@ -18,6 +18,7 @@ function makeList() {
 	//make number pageList
 	numberOfPages = Math.ceil(pagination_list.length / numberPerPage);
 	currentPage = 1;
+	document.getElementById("statPageNumber").innerText = currentPage;
 }
 
 function nextStatPage() {
@@ -64,9 +65,9 @@ function load_board(){
 // make categorical feature
 //------------------------------------------
 function show_stat(e){
+	let id = e.srcElement.getAttribute("id")
 	for (var i=0; i < stat_tr_list.length; i++) {
 		let tr = stat_tr_list[i];
-		let id = e.srcElement.getAttribute("id")
 		if (id == "all_pairs" || id == tr.getElementsByTagName("th")[0].innerText.replace("/", "")){
 			tr.setAttribute("class", "");
 		}
@@ -83,9 +84,9 @@ function show_stat(e){
 //--------------------------------------------
 
 // add event function in li tag in currency pairs list
-const ul = document.querySelector("#list-pairs").getElementsByTagName("li");
-for (var i=0; i < ul.length; i++) {
-	let id = ul[i].getAttribute("id");	
+const ul_list_pairs = document.querySelector("#list-pairs").getElementsByTagName("li");
+for (var i=0; i < ul_list_pairs.length; i++) {
+	let id = ul_list_pairs[i].getAttribute("id");	
 	let obj = document.querySelector("#"+id);
 	obj.addEventListener("click", show_stat);
 }

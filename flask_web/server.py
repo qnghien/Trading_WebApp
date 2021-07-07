@@ -4,12 +4,24 @@ Server class contains all methods used to process request Get/Post that need man
 """
 from flask_web.create_data import insert_transaction #database module
 import datetime
+import requests
 
 class WebServer():
     
-    def __init__(self, mysql):
-        self.mysql = mysql
+    def __init__(self, mydatabase):
+        self.mydatabase = mydatabase
         
+    #---------------------------------------------
+    def conn(self):
+        '''
+        create connect with database
+        Returns
+        -------
+        return a connect obj
+        '''
+        #return self.mydatabase.connect() #for mysql
+        return self.mydatabase #for postgresql
+ 
         
     #-------------------------------------------------------------------------    
     ''' INSERT REQUEST'''
@@ -34,10 +46,10 @@ class WebServer():
         volume = form['volume']
         
         #adjust format day
-        time = datetime.datetime.strptime(day, "%Y-%m-%dT%H:%M")
+        time = datetime.datetime.strptime(day, "%Y-%m-%d")
         day = str(time.year) + "/" + str(time.month) + "/" + str(time.day)
         
-        conn = self.mysql.connect()
+        conn = self.conn()
         insert_transaction(conn, currency_index, status, price, day, volume, user_id)
         
         
@@ -48,9 +60,9 @@ class WebServer():
     
     #--------------------------------------------
     def get_transaction_log(self, user_id, limit=0):
-        conn = self.mysql.connect()
+        conn = self.conn()
         cursor = conn.cursor()
-        log_query = "select * from transaction where user_id= (%s) order by day desc"
+        log_query = "select * from transactions where user_id= (%s) order by day desc"
         if limit > 0:
             log_query += " Limit " + str(limit)
         
@@ -60,7 +72,7 @@ class WebServer():
         
     #--------------------------------------------
     def get_portfolio_by_user(self, user_id):
-        conn = self.mysql.connect()
+        conn = self.conn()
         cursor = conn.cursor()
         portfolio_query = "WITH define_qty AS (SELECT ROW_NUMBER() OVER (ORDER BY day) AS rank_day, \
                                     CASE \
@@ -69,7 +81,7 @@ class WebServer():
                                     ELSE volume \
                                     END AS qty, \
                             price, currency_index \
-                            FROM transaction \
+                            FROM transactions \
                             WHERE user_id = (%s) ) \
                             SELECT currency_index, SUM(qty) OVER (PARTITION BY currency_index ORDER BY rank_day) AS quant_cum, price \
                             FROM define_qty \
@@ -77,5 +89,98 @@ class WebServer():
         cursor.execute(portfolio_query, (user_id,))
         data = cursor.fetchall()
         return data
+    
+    
     #--------------------------------------------
+    """ Get the current price of the currency pair
+        Parameters
+        ----------
+         
+        pair : string, currency pair's code
+
+        Returns
+        -------
+        The pair's current price (float)
+        """
+    def get_current_pair_price(self, pair):
+        API_URL = 'https://api.twelvedata.com/'
+        API_KEY = 'ec344517980f4b9294a405e9ab48e346'
+        params = {
+        'symbol': pair,
+        'apikey': API_KEY
+        } 
+
+        type_request = 'price'
+        url = API_URL + type_request
+        r = requests.get(url, params=params)
+
+        if r.status_code != 200 and not 'values' in r.json().keys():
+            print('Request error:', r.text)
+            return None
+
+        return float(r.json()['price'])
+    
+    
+    #--------------------------------------------
+    """ Get the price list from the current portfolio occupied by user
+        Parameters
+        ----------
+         
+        user_id : int, user's id number
+
+        Returns
+        -------
+        The expected profit from the current portfolio occupied by user
+        """
+    def get_current_price_list(self, user_id):
+        portfolio_data = self.get_portfolio_by_user(user_id)
+        pair_list = []
+        for i in range (len(portfolio_data)):
+            pair_list.append(portfolio_data[i][0])
         
+        cur_price_list = []
+        for pair in pair_list:
+            cur_price_list.append(self.get_current_pair_price(pair))
+            
+        return cur_price_list
+    
+    #--------------------------------------------
+    """ Get the expected profit from the current portfolio occupied by user
+        Parameters
+        ----------
+         
+        user_id : int, user's id number
+
+        Returns
+        -------
+        The expected profit from the current portfolio occupied by user
+        """
+        
+    def get_expected_profit(self, user_id):
+        
+        portfolio_data = self.get_portfolio_by_user(user_id)
+        
+        quant_cum_list = []
+        price_list = []
+        for i in range (len(portfolio_data)):
+            quant_cum_list.append(portfolio_data[i][1])
+            price_list.append(portfolio_data[i][2])
+        
+        cur_price_list = self.get_current_price_list(user_id)
+        profit_list = []
+        
+        for i in range(len(price_list)):
+            profit_list.append(round((cur_price_list[i] - float(price_list[i])) * quant_cum_list[i], 4))
+        
+        return profit_list
+    
+    #--------------------------------------------
+    def get_crawl_data(self, limit=3):
+        conn = self.conn()
+        cursor = conn.cursor()
+        query = "SELECT * FROM trading_data LIMIT " + str(limit)
+      
+        cursor.execute(query)
+        data = cursor.fetchall()
+        return data
+    

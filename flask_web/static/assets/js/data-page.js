@@ -29,7 +29,6 @@ function previousLogPage() {
 function loadLogList() {
 	for (i = 0; i < transaction_log_list.length; i++) {
 		if (i >= (currentlogPage - 1) * numberPerPage && i < currentlogPage * numberPerPage){
-			
 			transaction_log_list[i].setAttribute("class", "");
 		}
 		else{

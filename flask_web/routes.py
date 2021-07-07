@@ -1,6 +1,6 @@
 from flask_web import app, session, webserver
-from flask import render_template, redirect, url_for, request
-
+from flask import render_template, redirect, url_for, request, jsonify
+import pandas as pd
 #-----------------------------------------------------------------------------
 def login_required(function):
     '''A Python Decorator
@@ -37,8 +37,12 @@ def optimize_portfolio():
 @login_required
 def data_report():
     log = webserver.get_transaction_log(session['id'])
-    
-    return render_template("data.html", user_name=session['username'], log=log)
+    crawl_data = webserver.get_crawl_data()
+    col_crawl_data = ['id', 'currency_index', 'date', 'open_price', 'high_price', 'low_price', 
+                      'close_price', 'cci', 'macd', 'macd_signal', 'macd_hist', 'ema', 'rsi', 
+                      'fast_k', 'fast_d', 'supertrend', 'sma', 'wma', 'vwap']
+    return render_template("data.html", user_name=session['username'], log=log, crawl_data=crawl_data,
+                           col_crawl_data = col_crawl_data)
     
 
 #------------------------------------------------------------------------------
@@ -46,22 +50,48 @@ def data_report():
 def process_request():
     '''Recive all request from client then classify them and sent to corresponding methods in server file
          categorical:
-             1xx. INSERT  
-                 + 100 : transaction into database
+             1xx. POST 
+                 + 100 : transaction into database (form format)
+                 + 101 : sent stat-data(Json format) to get profit
              
              -----------------------------------
              2xx. GET
-                 + 200 : get
+                 + 200 : get current price, include 2 args in request are 'typeRequest' and 'list_currency'
+                 
                  
             ------------------------------------
-        NOTE: all request sent to /oder must spesify "type_request" term in form
-        Examp: <input type="hidden" name="typeRequest" value="1"/>
+        NOTE: all request sent to process_request must spesify "type_request" term in form
+        Examp: <input type="hidden" name="typeRequest" value="1xx"/> in form
+            or data:{'typeRequest': "2xx"} in ajax function
     '''
     
     user_id = session['id']
-    if request.method == "POST" and 'typeRequest' in request.form :
-        if int(request.form['typeRequest']) == 100:
+    #post requests
+    if request.method == "POST":
+        #100
+        if 'typeRequest' in request.form and int(request.form['typeRequest']) == 100:
             webserver.insert_transaction_request(request.form, user_id)
+            return redirect(url_for("index"))
         
-
+        
+        #101
+        if request.is_json:
+            jsondata = request.get_json()
+            if "typeRequest" in jsondata.keys() and int(jsondata['typeRequest']) == 101:
+                #df = pd.DataFrame(jsondata['data'])
+                profit_list = webserver.get_expected_profit(user_id=session['id'])
+                return jsonify({'profit_list': profit_list})
+        
+        
+    
+    #get requests
+    if request.method == "GET":
+        #200
+        if "typeRequest" in request.args and int(request.args.get("typeRequest")) == 200:
+            list_currency = request.args.get("list_currency").replace("-", "/").split("+")
+            cur_price_list = webserver.get_current_price_list(user_id=session['id'])   
+            return jsonify({'cur_price_list': cur_price_list})
+    
+    
+    #other
     return redirect(url_for("index"))

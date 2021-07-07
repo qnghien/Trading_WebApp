@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for
-from flask_web import app, mysql, session
+from flask_web import app, session, webserver
 import re
 
 @app.route('/')
@@ -9,8 +9,9 @@ def login():
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
         password = request.form['password']
-        cursor = mysql.connect().cursor()
-        cursor.execute("select * from user where username='" + username + "' and password='" + password + "'")
+        conn = webserver.conn()
+        cursor = conn.cursor()
+        cursor.execute("select * from users where username='" + username + "' and password='" + password + "'")
         data = cursor.fetchone()
         if data:
             session['loggedin'] = True
@@ -34,9 +35,9 @@ def signup():
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
         password = request.form['password']
-        conn = mysql.connect()
+        conn = webserver.conn()
         cursor = conn.cursor()
-        cursor.execute("select * from user where username='"+username+"' and password='" + password+"'")
+        cursor.execute("select * from users where username='"+username+"' and password='" + password+"'")
         data = cursor.fetchone()
         if data:  
             msg = 'Username already exists'
@@ -48,10 +49,9 @@ def signup():
             msg = 'Fill out the form'
        
         else:
-            cursor.execute('INSERT INTO user (username, password) VALUES (%s, %s)', (username, password,))
+            cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password,))
             conn.commit()
             msg = 'You have successfully registered !'  
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
     return render_template('signup.html', msg = msg)
-

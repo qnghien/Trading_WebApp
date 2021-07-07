@@ -28,14 +28,14 @@
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="card card-stats">
+                    <div class="card card-stats" id="revenueCard">
                         <!-- Card body -->
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
                                     <h5 class="card-title text-uppercase text-muted mb-0">Exp Revenue</h5>
                                     <span class="h2 font-weight-bold mb-0">
-                                    0$
+                                    Update Profit
                                     </span>
                                 </div>
                             </div>
@@ -94,17 +94,27 @@
                         {% endfor%}
                     </ul>
                 </div>
-                <button type="button" class="btn btn-sm">Update</button>
+                <div class="btn-group me-2" roll="group">
+                    <button  type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Update
+                    </button>
+                    <ul id="update-start-board-feature" class="dropdown-menu" aria-labelledby="list-pairs-btn">
+                        <li id="update-cur-price-btn" class="dropdown-item">Current Price</li>
+                        <li id="update-profit-btn" class="dropdown-item">Expect profit</li>
+                    </ul>
+                </div>
             </div>
         </div>
         <!-- Stats Board body-->
         <div class="table-responsive" id="stats-board">
-            <table class="table align-items-center table-flush pl-3" >
-                <thead class="thead-light">
+            <table class="table" >
+                <thead class="thead-light" id="stat-board-header">
                     <tr>
                         <th scope="col">Currency</th>
                         <th scope="col">Volume</th>
                         <th scope="col">Order Price</th>
+                        <th scope="col">Current Price</th>
+                        <th scope="col">Expect Profit</th>
                     <tr>
                 </thead>
                 <tbody id="stat-board-body">
@@ -113,13 +123,15 @@
                         <th scope="row">{{row[0]}}</th>
                         <th scope="col">{{row[1]}}</th>
                         <th scope="col">{{row[2]}}</th>
+                        <th scope="col">Need Update </th>
+                        <th scope="col">Need Update </th>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 		<!-- Stats Board footer -->
-		<div class="card-footer py-4">
+		<div class="card-footer py-2">
 			<nav aria-label="...">
 				<ul class="pagination justify-content-end mb-0">
 					<li class="page-item" id="statBoardPrevious">
@@ -202,7 +214,7 @@
                 </div>
                 <div class="row mb-3">
                     <label for="date-order">Date</label>
-                    <input class="form-control" type="datetime-local" id="date-order" name="datetime" required>
+                    <input class="form-control" type="date" id="date-order" name="datetime" placeholder="YYYY-MM-DD" required>
                 </div>
                 <div class="row mb-3">
                     <label for="price">Price</label>
@@ -218,7 +230,7 @@
                         <label class="form-check-label" for="sell-order">Sell</label>
                     </div>
                     <div>
-                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+                        <input id ="token" type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" name="typeRequest" value="100"/>
                         <div class="row alight-items-center mt-3 mb-2"><button type="submit" class="btn btn-primary">Order</button></div>
             </form>
@@ -232,4 +244,5 @@
 <!-- Optional JavaScript -->
 <script src="{{url_for('static',filename='assets/js/time.js')}}"></script>
 <script src="{{url_for('static',filename='assets/js/stat-board.js')}}"></script>
+<script src="{{url_for('static',filename='assets/js/update-stat-board.js')}}"></script>
 {% endblock %}

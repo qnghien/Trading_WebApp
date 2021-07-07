@@ -19,7 +19,7 @@
 		<div class="card">
 			<!-- Card header -->
 			<div class="card-header border-0">
-				<h3 class="mb-0">Your Transaction Log</h3>
+				<h3 class="mb-0">Data Crawled</h3>
 			</div>
 			<!-- table -->
 			<div class="table-responsive">
@@ -64,6 +64,39 @@
 						</li>
 					</ul>
 				</nav>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Craw data table -->
+<div class="row">
+	<div class="col">
+		<div class="card">
+			<!-- Card header -->
+			<div class="card-header border-0">
+				<h3 class="mb-0">Your Transaction Log</h3>
+			</div>
+			<!-- table -->
+			<div class="table-responsive">
+				<table class="table align-items-center table-flush">
+					<thead class="thead-light">
+						<tr>
+							{% for col in col_crawl_data %}
+							<th scope="col" class="sort text-sm" >{{col}}</th>
+							{% endfor %}
+
+						</tr>
+					</thead>
+					<tbody class="list" id="transactionLogBoard">
+						{% for row in crawl_data%}
+						<tr>
+							{% for col in row%}
+							<th scope="row">{{col}}</th>
+							{%endfor%}
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
