@@ -3,6 +3,7 @@
 Server class contains all methods used to process request Get/Post that need manipulate with database
 """
 from flask_web.create_data import insert_transaction #database module
+from flask_web.portfolio_optimization import Generator #generate signal
 import datetime
 import requests
 
@@ -10,6 +11,7 @@ class WebServer():
     
     def __init__(self, mydatabase):
         self.mydatabase = mydatabase
+        self.generator = Generator
         
     #---------------------------------------------
     def conn(self):
@@ -51,8 +53,6 @@ class WebServer():
         
         conn = self.conn()
         insert_transaction(conn, currency_index, status, price, day, volume, user_id)
-        
-        
         
         
     #-------------------------------------------------------------------------
@@ -156,7 +156,7 @@ class WebServer():
         The expected profit from the current portfolio occupied by user
         """
         
-    def get_expected_profit(self, user_id):
+    def get_expected_profit(self, cur_price_list, user_id):
         
         portfolio_data = self.get_portfolio_by_user(user_id)
         
@@ -166,16 +166,28 @@ class WebServer():
             quant_cum_list.append(portfolio_data[i][1])
             price_list.append(portfolio_data[i][2])
         
-        cur_price_list = self.get_current_price_list(user_id)
         profit_list = []
         
         for i in range(len(price_list)):
-            profit_list.append(round((cur_price_list[i] - float(price_list[i])) * quant_cum_list[i], 4))
+            profit_list.append(round((cur_price_list[i] - float(price_list[i])) * float(quant_cum_list[i]), 4))
         
         return profit_list
     
     #--------------------------------------------
-    def get_crawl_data(self, limit=3):
+    def get_crawl_data(self, limit=5):
+        """Get a number of record from the data crawled in database 
+        
+        Parameters
+        ----------
+        limit : INT, optional equal 5
+            The number of record 
+
+        Returns
+        -------
+        data : list
+        The data crawled
+
+        """
         conn = self.conn()
         cursor = conn.cursor()
         query = "SELECT * FROM trading_data LIMIT " + str(limit)
@@ -184,3 +196,27 @@ class WebServer():
         data = cursor.fetchall()
         return data
     
+    #-----------------------------------------------
+    def get_data_opt_port_chart(self, pair, indicators):
+        '''Process request 201. The user sent currency index and list of indicators to plot chart. 
+        This function will call optimize_portfolio module and return price data and buy/sell signal sequences
+        
+
+        Parameters
+        ----------
+        pair : Str, currency index.
+        indicator : list[str], the name of indicators.
+
+        Returns
+        -------
+        price : dict, close price
+        signal : dict, buy/sell signal
+        profit : )
+        '''
+        self.generator.set_database_conn(self.conn())
+        result = self.generator.optimize_portfolio(cur=pair, indicator_list=indicators)
+        price = result[0].to_json()
+        signal = result[1].to_json()
+        profit = str(round(result[2], 5))
+        return price, signal, profit
+        

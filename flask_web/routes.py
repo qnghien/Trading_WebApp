@@ -1,6 +1,6 @@
 from flask_web import app, session, webserver
 from flask import render_template, redirect, url_for, request, jsonify
-import pandas as pd
+
 #-----------------------------------------------------------------------------
 def login_required(function):
     '''A Python Decorator
@@ -30,7 +30,11 @@ def index():
 @app.route('/optimize-portfolio', endpoint="optimize_portfolio")
 @login_required
 def optimize_portfolio():
-    return render_template("optimize-portfolio.html", user_name=session['username'])
+    currency_list = ["USD/AUD"]
+    indicators = list(webserver.generator.get_indicators().keys())
+    
+    return render_template("optimize-portfolio.html", user_name=session['username'],
+                           currency_list=currency_list, indicators=indicators)
 
 #------------------------------------------------------------------------------
 @app.route('/data', endpoint="data_report")
@@ -57,7 +61,7 @@ def process_request():
              -----------------------------------
              2xx. GET
                  + 200 : get current price, include 2 args in request are 'typeRequest' and 'list_currency'
-                 
+                 + 201 : get plot for portfolio optimization page
                  
             ------------------------------------
         NOTE: all request sent to process_request must spesify "type_request" term in form
@@ -78,20 +82,25 @@ def process_request():
         if request.is_json:
             jsondata = request.get_json()
             if "typeRequest" in jsondata.keys() and int(jsondata['typeRequest']) == 101:
-                #df = pd.DataFrame(jsondata['data'])
-                profit_list = webserver.get_expected_profit(user_id=session['id'])
+                cur_price_list = [float(value) for value in jsondata['data']]
+                profit_list = webserver.get_expected_profit(cur_price_list=cur_price_list, user_id=session['id'])
                 return jsonify({'profit_list': profit_list})
         
         
-    
+
     #get requests
     if request.method == "GET":
         #200
         if "typeRequest" in request.args and int(request.args.get("typeRequest")) == 200:
-            list_currency = request.args.get("list_currency").replace("-", "/").split("+")
             cur_price_list = webserver.get_current_price_list(user_id=session['id'])   
             return jsonify({'cur_price_list': cur_price_list})
     
+        #201
+        if "typeRequest" in request.args and int(request.args.get("typeRequest")) == 201:
+            pair = request.args["pair"].replace("-", "/")
+            indicators = request.args["indicators"].split("+")
+            price, signal, exp_profit = webserver.get_data_opt_port_chart(pair=pair, indicators=indicators)
+            return jsonify({"exp_profit":exp_profit, 'price':price, "signal":signal})
     
     #other
     return redirect(url_for("index"))

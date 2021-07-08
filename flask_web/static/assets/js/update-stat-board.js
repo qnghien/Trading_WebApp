@@ -14,14 +14,19 @@ function update_stat_board(e) {
 		//sent request and receive response
 		$.ajax({ url: "/r",
 			type: "GET",
-			data: {"list_currency": list_currency, "typeRequest":200},
+			data: {"typeRequest":200},
 			success: function(response) {
 				current_price = response.cur_price_list;
 				list_currency = list_currency.replaceAll("-", "/").split("+");
 				show_current_price(list_currency, current_price);
+				CHECK_CURRENT_PRICE = 1;
+			},
+			error: function(error){
+				console.log("error get request id 200");
+				console.log(error);
 			},
 		});     
-		CHECK_CURRENT_PRICE = 1;
+		
 	}
 	
 	if (id == "update-profit-btn") {
@@ -30,15 +35,11 @@ function update_stat_board(e) {
 		}
 		else {
 			let stat_board_body = document.getElementById("stat-board-body").getElementsByTagName("tr");
-			let data = {};
+			let data = [];
 			
 			for (let i=0; i < stat_board_body.length; i++){
 				let tr = stat_board_body[i];
-				let features = {};
-				for (let j=0; j < tr.childElementCount; j++){
-					features[j.toString()] = tr.getElementsByTagName('th')[j].innerHTML;
-				}
-				data[i.toString()] = features;
+				data.push(tr.getElementsByTagName('th')[3].innerHTML);
 				
 			}
 			data = {'typeRequest':101, "data":data};

@@ -3,6 +3,9 @@
 {% block stylesheets %}
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='assets/css/custom.css') }}">
 {% endblock stylesheets %}
+{% block plugin %}
+<script src='https://cdn.plot.ly/plotly-2.2.0.min.js'></script>
+{% endblock plugin %}
 {%block header %}
 <div class="header bg-primary pb-6">
    <div class="container-fluid">
@@ -23,32 +26,34 @@
          <div class="card-header bg-transparent">
             <div class="row align-items-center">
                <div class="col">
-                  <h6 class="text-light text-uppercase ls-1 mb-1">Chart</h6>
-                  <h5 class="h3 text-white mb-0">Plot-title</h5>
+                  <h5 class="h3 text-white mb-0 text-uppercase">Chart</h5>
                </div>
             </div>
          </div>
          <div class="card-body">
             <!-- Chart -->
-            <div class="chart">
+            <div class="">
                <!-- Chart plot -->
-               <canvas id="chart-dark" class=""></canvas>
+			
+               <div id="chart-board" class=""></div>
             </div>
          </div>
       </div>
    </div>
    <!-- Profit and control pannel-->
    <div class="col-xl-3 pt-3">
+		<!-- Profit -->
 		<div class="row">
-			<div class="card bg-success">
+			<div class="card bg-teal">
 				<div class="card-header bg-transparent">
 					<div class="row align-items-center ">
 						<h5 class="h3 mb-0 text-center">Profit</h5>
 					</div>
 				</div>
-				<div class="card-body text-center">50%</div>
+				<div class="card-body text-center" id="profit-body"></div>
 			</div>
         </div>
+		<!-- Plot Tool -->
 		<div class="row">
 			<div class="card">
 				<div class="col">
@@ -56,19 +61,28 @@
 						<h5 class="text-uppercase ls-1 mb-1">Tool</h5>
 					</div>
 					<div class="card-body text-center">
+					
 						<div class="row input-group pl-4">
+							<h3>Choose Currency</h3>
 							<select class="form-select" id="inputCurrencyPair">
-								<option selected value="default">Choose Currency</option>
+								{% for pair in currency_list%}
+								<option value="{{pair.replace("/", "-")}}">{{pair}}</option>
+								{%endfor%}
 							</select>
 						</div>
 						<div class="row input-group pt-2 pl-4">
-							<select class="form-select" id="inputIndicator">
-								<option value="default" selected>Choose Indicator</option>
+							<h3>Choose Indicator</h3>
+							<select class="form-select" id="inputIndicator" multiple>
+								{% for indicator in indicators%}
+								<option value="{{indicator}}">
+									<span>{{indicator}}</span>
+								</option>
+								{% endfor%}
 							</select>
 						</div>
 					</div>
 					<div class="card-footer text-center">
-						<button type="butto" class="btn btn-primary">Plot Chart</button>
+						<button type="button" class="btn btn-primary" id="plot-char-btn">Plot Chart</button>
 					</div>
 				</div>
 			</div>
@@ -78,4 +92,5 @@
 {% endblock %}
 {% block javascripts %}
 <!-- Optional JavaScript -->
+<script src="{{url_for('static',filename='assets/js/plot_chart.js')}}"></script>
 {% endblock %}
