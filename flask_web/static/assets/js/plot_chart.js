@@ -70,7 +70,7 @@ function plot_chart(dict_price, dict_signal){
 	};
 
 	var data = [price_line, buy_line, sell_line];
-	var layout = {title: '<h5 class="h3 text-white mb-0">Plot-title</h5>'};
+	var layout = {title: 'Title???'};
 	var config = {
 		responsive: true, 
 		showlegend: true,
@@ -82,6 +82,7 @@ function plot_chart(dict_price, dict_signal){
 		modeBarButtonsToRemove: ['pan2d','selectLasso','lasso2d','resetScale2d',,
 								'boxSelect', 'autoScale2d', 'zoom2d',  'toggle2d']
 	};
+	
 	document.getElementById("chart-board").innerHTML = "";
 	Plotly.newPlot('chart-board', data, layout, config);
 }

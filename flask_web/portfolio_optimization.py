@@ -367,7 +367,8 @@ class IndicatorAnalyst():
 
   #---------------------------------------------
   def optimize_portfolio(self, cur, indicator_list):
-    cur_list = np.array(['USD/AUD', 'USD/CAD', 'USD/CHF', 'USD/EUR', 'USD/GBP', 'USD/JPY', 'USD/NZD'])
+    #cur_list = np.array(['USD/AUD', 'USD/CAD', 'USD/CHF', 'USD/EUR', 'USD/GBP', 'USD/JPY', 'USD/NZD'])
+    cur_list = np.array(['USD/AUD', 'USD/NZD'])
     pairs = self.read_cur(cur_list)
     result = self.cur_analyze(pairs, cur, indicator_list)
     return result

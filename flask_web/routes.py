@@ -30,7 +30,7 @@ def index():
 @app.route('/optimize-portfolio', endpoint="optimize_portfolio")
 @login_required
 def optimize_portfolio():
-    currency_list = ["USD/AUD"]
+    currency_list = ["USD/AUD", 'USD/NZD']
     indicators = list(webserver.generator.get_indicators().keys())
     
     return render_template("optimize-portfolio.html", user_name=session['username'],
@@ -48,6 +48,11 @@ def data_report():
     return render_template("data.html", user_name=session['username'], log=log, crawl_data=crawl_data,
                            col_crawl_data = col_crawl_data)
     
+#------------------------------------------------------------------------------
+@app.route("/user-guide")
+def user_guide():
+    return render_template("user-guide.html")
+ 
 
 #------------------------------------------------------------------------------
 @app.route("/r", methods=["POST", "GET"], endpoint="process_request")

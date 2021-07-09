@@ -8,21 +8,11 @@ app.config.update({
     "SECRET_KEY" : "81a2cd4169d3bbc6600b704c"
     })
 
-# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-# app.config['MYSQL_DATABASE_USER'] = 'root'
-# app.config['MYSQL_DATABASE_PASSWORD'] = 'ducanh2001'
-# app.config['MYSQL_DATABASE_DB'] = 'user_portfolio'
-# app.config['MYSQL_DATABASE_PORT'] = 3306
-
-
 #CSSRF protect---------------------------------------------------------------
 csrf = CSRFProtect()
 csrf.init_app(app)
 
 #Database ----------------------------------------------------------------------
-#from flaskext.mysql import MySQL
-# mydatabse = MySQL()
-# mydatabse.init_app(app)
 
 import psycopg2 
 mydatabse = psycopg2.connect(
