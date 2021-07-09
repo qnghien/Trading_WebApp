@@ -22,6 +22,7 @@ class IndicatorAnalyst():
         cur_pair: name of the currency pair.
     """
   __indicators = {'cci','macd', 'ema', 'rsi', 'stochrsi','supertrend','sma', 'wma' , 'vwap'}
+  __cur_list = ['USD/AUD', 'USD/NZD', 'USD/JPY']
   __cur_pair = ""
   __db_conn = None
 
@@ -42,7 +43,8 @@ class IndicatorAnalyst():
     # Indicator: get the following indicators for the process
   def get_indicators(self):
     return self.__indicators
-
+  def get_cur_list(self):
+    return self.__cur_list
    # Set the data - the currency pair.
   def set_data(self, dataframe):
     self.df = dataframe.copy()
@@ -367,8 +369,7 @@ class IndicatorAnalyst():
 
   #---------------------------------------------
   def optimize_portfolio(self, cur, indicator_list):
-    #cur_list = np.array(['USD/AUD', 'USD/CAD', 'USD/CHF', 'USD/EUR', 'USD/GBP', 'USD/JPY', 'USD/NZD'])
-    cur_list = np.array(['USD/AUD', 'USD/NZD'])
+    cur_list = np.array(self.__cur_list)
     pairs = self.read_cur(cur_list)
     result = self.cur_analyze(pairs, cur, indicator_list)
     return result

@@ -20,20 +20,21 @@ function plot_chart_btn() {
 			},
 			error: function(error){
 				console.log("error get request id 201");
+				window.alert("Upgrade your account to use this option!");
 			},
 		});
 	}
 }
 
 //-----------------------------------
-let price = [];
-let signals_sell = [];
-let signals_buy = [];
-let index = [];
-let index_sell = [];
-let index_buy = [];
-function plot_chart(dict_price, dict_signal){
 
+function plot_chart(dict_price, dict_signal){
+	let price = [];
+	let signals_sell = [];
+	let signals_buy = [];
+	let index = [];
+	let index_sell = [];
+	let index_buy = [];
 	for (i in dict_price){
 		index.push(new Date(Number(i)));
 		price.push(dict_price[i]);

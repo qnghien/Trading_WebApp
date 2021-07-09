@@ -169,7 +169,7 @@ class WebServer():
         profit_list = []
         
         for i in range(len(price_list)):
-            profit_list.append(round((cur_price_list[i] - float(price_list[i])) * float(quant_cum_list[i]), 4))
+            profit_list.append(round((cur_price_list[i] - float(price_list[i])) * float(abs(quant_cum_list[i])), 4))
         
         return profit_list
     
